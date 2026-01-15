@@ -19,14 +19,11 @@ builder:
         relativePaths: true
         additionalFiles:
           - xs-app.json
-          - sw.js
           - pwamanifest.json
-          - offline.html
   resources:
     excludes:
       - /test/**
       - /localService/**
-      - "**/sw.js"
       - xs-app.json
 resources:
   configuration:

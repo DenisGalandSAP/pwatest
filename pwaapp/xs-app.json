@@ -15,11 +15,6 @@
       "destination": "ui5"
     },
     {
-      "source": "^/offline.html$",
-      "service": "html5-apps-repo-rt",
-      "authenticationType": "none"
-    },
-    {
       "source": "^(.*)$",
       "target": "$1",
       "service": "html5-apps-repo-rt",
