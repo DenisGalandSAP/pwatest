@@ -8,6 +8,7 @@ modules:
   requires:
   - name: pwatest_html_repo_runtime
   - name: uaa_pwatest
+  - name: pwatest-connectivity-service
   - name: pwatest-destination-service
     group: destinations
     properties:
@@ -72,10 +73,20 @@ resources:
             ProxyType: Internet
             Type: HTTP
             URL: https://ui5.sap.com
+          - Authentication: PrincipalPropagation
+            Name: DTA310-PP
+            ProxyType: OnPremise
+            Type: HTTP
+            URL: http://webdispdta.resa.be:45300
           existing_destinations_policy: update
       version: 1.0.0
     service: destination
     service-name: pwatest-destination-service
+    service-plan: lite
+- name: pwatest-connectivity-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: connectivity
     service-plan: lite
 parameters:
   deploy_mode: html5-repo

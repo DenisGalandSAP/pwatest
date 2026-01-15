@@ -23,7 +23,6 @@ builder:
   resources:
     excludes:
       - /test/**
-      - /localService/**
       - xs-app.json
 resources:
   configuration:

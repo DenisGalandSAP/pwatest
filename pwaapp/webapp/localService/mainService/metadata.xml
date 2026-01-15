@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0"
+xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"
+xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"
+xmlns:sap="http://www.sap.com/Protocols/SAPData">
+<edmx:Reference Uri="http://webdispdta.resa.be:45300/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMON',Version='0001',SAP__Origin='')/$value"
+xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+<edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="Common"/>
+</edmx:Reference>
+<edmx:DataServices m:DataServiceVersion="2.0">
+    <Schema Namespace="ZGP_PM_OMPA_SRV" xml:lang="en" sap:schema-version="1"
+    xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+    <EntityType Name="ZV_HR_B_PA0001_MAXENDDATEType" sap:label="PA0001 Single Entry Max End Date" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="PersonelNumber"/>
+        </Key>
+        <Property Name="PersonelNumber" Type="Edm.String" Nullable="false" MaxLength="8" sap:display-format="NonNegative" sap:label="Personnel number"/>
+        <Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
+        <Property Name="FullName" Type="Edm.String" MaxLength="40" sap:label="Employee/app.name"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_H_CAUSE_HELPType" sap:label="PM: Value Help cause avis" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="Cause"/>
+        </Key>
+        <Property Name="Cause" Type="Edm.String" Nullable="false" MaxLength="49" sap:display-format="UpperCase" sap:text="Cause" sap:label="Cause"/>
+        <Property Name="Code" Type="Edm.String" MaxLength="4" sap:display-format="UpperCase" sap:label="Code"/>
+        <Property Name="Codegruppe" Type="Edm.String" MaxLength="8" sap:display-format="UpperCase" sap:label="Code group"/>
+        <Property Name="Kurztext2" Type="Edm.String" MaxLength="40" sap:label="Short text"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_B_OMPA_ORDER_ITEMS_ADMINType" sap:label="Order Header Items View for OMPA" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="OrderNumber"/>
+            <PropertyRef Name="OperationNumber"/>
+            <PropertyRef Name="Batch"/>
+            <PropertyRef Name="Counter"/>
+            <PropertyRef Name="PersonelNumber"/>
+        </Key>
+        <Property Name="OrderNumber" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Order"/>
+        <Property Name="OperationNumber" Type="Edm.String" Nullable="false" MaxLength="4" sap:display-format="UpperCase" sap:label="Activity"/>
+        <Property Name="Batch" Type="Edm.Byte" Nullable="false" sap:label="Split number"/>
+        <Property Name="Counter" Type="Edm.Byte" Nullable="false" sap:label="Counter"/>
+        <Property Name="PersonelNumber" Type="Edm.String" Nullable="false" MaxLength="8" sap:display-format="NonNegative" sap:label="Personnel Number"/>
+        <Property Name="RoutingOperationNumber" Type="Edm.String" MaxLength="10" sap:display-format="NonNegative" sap:label="Opertn task list no."/>
+        <Property Name="OperationText" Type="Edm.String" MaxLength="40" sap:label="Operation short text"/>
+        <Property Name="FullName" Type="Edm.String" MaxLength="40" sap:label="Employee/app.name"/>
+        <Property Name="StartDate" Type="Edm.DateTimeOffset" Precision="0"/>
+        <Property Name="EndDate" Type="Edm.DateTimeOffset" Precision="0"/>
+        <Property Name="Status" Type="Edm.String" MaxLength="20"/>
+        <Property Name="LongText" Type="Edm.String" MaxLength="255" sap:display-format="UpperCase" sap:label="Char255"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_H_DEPA_ELEC_FCLOType" sap:label="IS : Dépanage élec - helper Poste tech." sap:content-version="1">
+        <Key>
+            <PropertyRef Name="Parent"/>
+            <PropertyRef Name="Child"/>
+        </Key>
+        <Property Name="Parent" Type="Edm.String" Nullable="false" MaxLength="40" sap:display-format="UpperCase" sap:label="Superior FunctLoc."/>
+        <Property Name="Child" Type="Edm.String" Nullable="false" MaxLength="40" sap:display-format="UpperCase" sap:label="Functional Location"/>
+        <Property Name="Description" Type="Edm.String" MaxLength="40" sap:label="FunctLocDescrip."/>
+        <NavigationProperty Name="to_Child" Relationship="ZGP_PM_OMPA_SRV.assoc_EE0174FE45D4451E57D43F1F27F76435" FromRole="FromRole_assoc_EE0174FE45D4451E57D43F1F27F76435" ToRole="ToRole_assoc_EE0174FE45D4451E57D43F1F27F76435"/>
+        <NavigationProperty Name="to_Parent" Relationship="ZGP_PM_OMPA_SRV.assoc_BDDCE103977458D66469E7F174C764A9" FromRole="FromRole_assoc_BDDCE103977458D66469E7F174C764A9" ToRole="ToRole_assoc_BDDCE103977458D66469E7F174C764A9"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_H_OMPA_STATUSType" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="DomvalueL"/>
+        </Key>
+        <Property Name="DomvalueL" Type="Edm.String" Nullable="false" MaxLength="10" sap:display-format="UpperCase" sap:label="Dom. lower value"/>
+        <Property Name="Ddtext" Type="Edm.String" MaxLength="60" sap:label="Short Descript."/>
+    </EntityType>
+    <EntityType Name="ZV_PM_H_ORDERType" sap:label="Order Search Help View" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="Aufnr"/>
+        </Key>
+        <Property Name="Aufnr" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Order"/>
+        <Property Name="Ktext" Type="Edm.String" MaxLength="40" sap:label="Description"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_H_ORDERTYPEType" sap:label="Order Type Search Help View" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="auart"/>
+        </Key>
+        <Property Name="auart" Type="Edm.String" Nullable="false" MaxLength="4" sap:display-format="UpperCase" sap:label="Order Type"/>
+        <Property Name="auartText" Type="Edm.String" MaxLength="40" sap:label="Short Text"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_H_WORKCENTERType" sap:label="Work Center Search Help View" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="Objty"/>
+            <PropertyRef Name="Objid"/>
+        </Key>
+        <Property Name="Objty" Type="Edm.String" Nullable="false" MaxLength="2" sap:display-format="UpperCase" sap:label="Object Type"/>
+        <Property Name="Objid" Type="Edm.String" Nullable="false" MaxLength="8" sap:display-format="NonNegative" sap:label="Object ID"/>
+        <Property Name="Arbpl" Type="Edm.String" MaxLength="8" sap:display-format="UpperCase" sap:label="Work center"/>
+        <Property Name="Ktext" Type="Edm.String" MaxLength="40" sap:label="Description"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_H_ACTION2_HELPType" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="codegruppe"/>
+            <PropertyRef Name="Action2"/>
+        </Key>
+        <Property Name="codegruppe" Type="Edm.String" Nullable="false" MaxLength="8" sap:display-format="UpperCase" sap:text="Action2" sap:label="Code group"/>
+        <Property Name="Action2" Type="Edm.String" Nullable="false" MaxLength="45" sap:display-format="UpperCase"/>
+        <Property Name="code" Type="Edm.String" MaxLength="4" sap:display-format="UpperCase" sap:label="Code"/>
+        <Property Name="kurztext" Type="Edm.String" MaxLength="40" sap:label="Short text for code"/>
+        <Property Name="katalogart" Type="Edm.String" MaxLength="1" sap:display-format="UpperCase" sap:label="Catalog"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_B_OMPA_ORDER_ITEMSType" sap:label="Order Header Items View for OMPA" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="OrderNumber"/>
+            <PropertyRef Name="OperationNumber"/>
+            <PropertyRef Name="Batch"/>
+            <PropertyRef Name="Counter"/>
+            <PropertyRef Name="PersonelNumber"/>
+        </Key>
+        <Property Name="OrderNumber" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Order"/>
+        <Property Name="OperationNumber" Type="Edm.String" Nullable="false" MaxLength="4" sap:display-format="UpperCase" sap:label="Activity"/>
+        <Property Name="Batch" Type="Edm.Byte" Nullable="false" sap:label="Split number"/>
+        <Property Name="Counter" Type="Edm.Byte" Nullable="false" sap:label="Counter"/>
+        <Property Name="PersonelNumber" Type="Edm.String" Nullable="false" MaxLength="8" sap:display-format="NonNegative" sap:label="Personnel Number"/>
+        <Property Name="RoutingOperationNumber" Type="Edm.String" MaxLength="10" sap:display-format="NonNegative" sap:label="Opertn task list no."/>
+        <Property Name="OperationText" Type="Edm.String" MaxLength="40" sap:label="Operation short text"/>
+        <Property Name="FullName" Type="Edm.String" MaxLength="40" sap:label="Employee/app.name"/>
+        <Property Name="StartDate" Type="Edm.DateTimeOffset" Precision="0"/>
+        <Property Name="EndDate" Type="Edm.DateTimeOffset" Precision="0"/>
+        <Property Name="Status" Type="Edm.String" MaxLength="20"/>
+        <Property Name="LongText" Type="Edm.String" MaxLength="255" sap:display-format="UpperCase" sap:label="Char255"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_B_OMPA_SPLITType" sap:label="Person per Split and Order View" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="OrderNumber"/>
+            <PropertyRef Name="OperationNumber"/>
+            <PropertyRef Name="PersonelNumber"/>
+        </Key>
+        <Property Name="OrderNumber" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Order"/>
+        <Property Name="OperationNumber" Type="Edm.String" Nullable="false" MaxLength="4" sap:display-format="UpperCase" sap:label="Activity"/>
+        <Property Name="PersonelNumber" Type="Edm.String" Nullable="false" MaxLength="8" sap:display-format="NonNegative" sap:label="Personnel Number"/>
+        <Property Name="RoutingOperationNumber" Type="Edm.String" MaxLength="10" sap:display-format="NonNegative" sap:label="Opertn task list no."/>
+        <Property Name="Counter" Type="Edm.Byte" sap:label="Counter"/>
+        <Property Name="FullName" Type="Edm.String" MaxLength="40" sap:label="Employee/app.name"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_B_USERSType" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="Pernr"/>
+        </Key>
+        <Property Name="Pernr" Type="Edm.String" Nullable="false" MaxLength="40" sap:label="Parameter value"/>
+        <Property Name="Usrid" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User"/>
+        <Property Name="parvarien" Type="Edm.String" MaxLength="40" sap:display-format="UpperCase"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_C_DEPA_ECR2Type" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="Aufnr"/>
+            <PropertyRef Name="Vornr"/>
+        </Key>
+        <Property Name="Aufnr" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Order"/>
+        <Property Name="Vornr" Type="Edm.String" Nullable="false" MaxLength="4" sap:display-format="UpperCase" sap:label="Activity"/>
+        <Property Name="Aufpl" Type="Edm.String" MaxLength="10" sap:display-format="NonNegative" sap:label="Opertn task list no."/>
+        <Property Name="Aplzl" Type="Edm.String" MaxLength="8" sap:display-format="NonNegative" sap:label="Counter"/>
+        <Property Name="Fsavd" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label="Earl.start date"/>
+        <Property Name="FunctionalLocation" Type="Edm.String" MaxLength="40" sap:display-format="UpperCase" sap:label="Functional loc."/>
+        <Property Name="Objnr" Type="Edm.String" MaxLength="22" sap:display-format="UpperCase" sap:label="Object number"/>
+        <Property Name="Ilart" Type="Edm.String" MaxLength="3" sap:display-format="UpperCase" sap:label="MaintActivType"/>
+        <Property Name="Postcode" Type="Edm.String" MaxLength="10" sap:display-format="UpperCase" sap:label="Code postal"/>
+        <Property Name="City" Type="Edm.String" MaxLength="40" sap:display-format="UpperCase" sap:label="Ville"/>
+        <Property Name="Street" Type="Edm.String" MaxLength="60" sap:display-format="UpperCase" sap:label="Rue"/>
+        <Property Name="Num" Type="Edm.String" MaxLength="21" sap:display-format="UpperCase" sap:label="Numéro"/>
+        <Property Name="UrdName" Type="Edm.String" MaxLength="35" sap:display-format="UpperCase" sap:label="Nom de l''URD"/>
+        <Property Name="UrdStreet" Type="Edm.String" MaxLength="25" sap:display-format="UpperCase" sap:label="Rue de l''URD"/>
+        <Property Name="UrdCity" Type="Edm.String" MaxLength="25" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="UrdNum" Type="Edm.String" MaxLength="21" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="UrdTel" Type="Edm.String" MaxLength="30" sap:display-format="UpperCase" sap:label="Téléphone de l''URD"/>
+        <Property Name="UrdGsm" Type="Edm.String" MaxLength="30" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="UrdEmail" Type="Edm.String" MaxLength="241" sap:display-format="UpperCase" sap:label="Email de l''URD"/>
+        <Property Name="Kurztext" Type="Edm.String" MaxLength="40" sap:label="Short text"/>
+        <Property Name="Qmtxt" Type="Edm.String" MaxLength="40" sap:label="Description"/>
+        <Property Name="Qmart" Type="Edm.String" MaxLength="2" sap:display-format="UpperCase" sap:label="Notification type"/>
+        <Property Name="Qmcod" Type="Edm.String" MaxLength="4" sap:display-format="UpperCase" sap:label="Coding Code"/>
+        <Property Name="Qmgrp" Type="Edm.String" MaxLength="8" sap:display-format="UpperCase" sap:label="Coding"/>
+        <Property Name="Qmnum" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Notification"/>
+        <Property Name="Avis" Type="Edm.String" MaxLength="22" sap:display-format="UpperCase" sap:label="Object number"/>
+        <Property Name="Ean" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="Anlage" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label="Numéro du compteur"/>
+        <Property Name="Stort" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="Statut" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="Smart" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label="Smart (O/N)"/>
+        <Property Name="PPP" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="LongText" Type="Edm.String" MaxLength="1333" sap:display-format="UpperCase"/>
+        <Property Name="Erzeit" Type="Edm.Time" Precision="0" sap:label="Created at"/>
+        <Property Name="Erdat" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label="Created On"/>
+        <Property Name="Equnr" Type="Edm.String" MaxLength="18" sap:display-format="UpperCase" sap:label="EquipmtAffctd"/>
+        <Property Name="HeureA" Type="Edm.Time" Precision="0" sap:label=""/>
+        <Property Name="DateD" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label=""/>
+        <Property Name="HeureF" Type="Edm.Time" Precision="0" sap:label=""/>
+        <Property Name="DateF" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label=""/>
+        <Property Name="Cause" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label="" sap:value-list="standard"/>
+        <Property Name="Cause2" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label="" sap:value-list="standard"/>
+        <Property Name="Action" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label="Action" sap:value-list="standard"/>
+        <Property Name="Action2" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label="Action2" sap:value-list="standard"/>
+        <Property Name="NumCab" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="NomCab" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="ModeMaj" Type="Edm.String" MaxLength="1" sap:display-format="UpperCase"/>
+        <Property Name="DepCab" Type="Edm.String" MaxLength="50" sap:display-format="UpperCase" sap:label="Numéro départ"/>
+        <Property Name="DesCab" Type="Edm.String" MaxLength="100" sap:display-format="UpperCase" sap:label="Désignation de la cabine"/>
+        <Property Name="AdrCab" Type="Edm.String" MaxLength="255" sap:display-format="UpperCase" sap:label=""/>
+        <Property Name="Intensite" Type="Edm.String" MaxLength="255" sap:display-format="UpperCase" sap:label="Intensité du compteur"/>
+        <Property Name="StatusCheck" Type="Edm.String" MaxLength="1" sap:display-format="UpperCase"/>
+        <Property Name="EndCode" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Boolean Variable (X=true, -=false, space=unknown)"/>
+        <Property Name="PaveDesc" Type="Edm.String" MaxLength="1333" sap:display-format="UpperCase" sap:label=""/>
+        <NavigationProperty Name="to_Action" Relationship="ZGP_PM_OMPA_SRV.assoc_2C132C1449BA3D546EB01FD199876E2C" FromRole="FromRole_assoc_2C132C1449BA3D546EB01FD199876E2C" ToRole="ToRole_assoc_2C132C1449BA3D546EB01FD199876E2C"/>
+        <NavigationProperty Name="to_Action2" Relationship="ZGP_PM_OMPA_SRV.assoc_18D66714495070AE1A2368EE020A641D" FromRole="FromRole_assoc_18D66714495070AE1A2368EE020A641D" ToRole="ToRole_assoc_18D66714495070AE1A2368EE020A641D"/>
+        <NavigationProperty Name="to_Cause" Relationship="ZGP_PM_OMPA_SRV.assoc_99235A5D23665FD240D16ABB82168A65" FromRole="FromRole_assoc_99235A5D23665FD240D16ABB82168A65" ToRole="ToRole_assoc_99235A5D23665FD240D16ABB82168A65"/>
+        <NavigationProperty Name="to_Cause2" Relationship="ZGP_PM_OMPA_SRV.assoc_DA603D1F804DDD394FBB48055D786CC6" FromRole="FromRole_assoc_DA603D1F804DDD394FBB48055D786CC6" ToRole="ToRole_assoc_DA603D1F804DDD394FBB48055D786CC6"/>
+        <NavigationProperty Name="to_FunctionalLocation" Relationship="ZGP_PM_OMPA_SRV.assoc_201C6F6E753E412511D9DA448EFF3706" FromRole="FromRole_assoc_201C6F6E753E412511D9DA448EFF3706" ToRole="ToRole_assoc_201C6F6E753E412511D9DA448EFF3706"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_H_ACTION_HELPType" sap:label="PM: Value Help cause avis" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="Action"/>
+        </Key>
+        <Property Name="Codegruppe" Type="Edm.String" MaxLength="8" sap:display-format="UpperCase" sap:label="Code group"/>
+        <Property Name="Kurztext2" Type="Edm.String" MaxLength="40" sap:label="Short text"/>
+        <Property Name="Action" Type="Edm.String" Nullable="false" MaxLength="49" sap:display-format="UpperCase" sap:label="Action"/>
+        <Property Name="Code" Type="Edm.String" MaxLength="4" sap:display-format="UpperCase" sap:label="Code"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_H_CAUSE2_HELPType" sap:label="PM: Causes Value Help champs 2" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="codegruppe"/>
+            <PropertyRef Name="Cause2"/>
+        </Key>
+        <Property Name="codegruppe" Type="Edm.String" Nullable="false" MaxLength="8" sap:display-format="UpperCase" sap:text="Cause2" sap:label="Code group"/>
+        <Property Name="Cause2" Type="Edm.String" Nullable="false" MaxLength="45" sap:display-format="UpperCase"/>
+        <Property Name="code" Type="Edm.String" MaxLength="4" sap:display-format="UpperCase" sap:label="Code"/>
+        <Property Name="kurztext" Type="Edm.String" MaxLength="40" sap:label="Short text for code"/>
+        <Property Name="katalogart" Type="Edm.String" MaxLength="1" sap:display-format="UpperCase" sap:label="Catalog"/>
+    </EntityType>
+    <EntityType Name="ZV_PM_B_OMPA_ORDERType" sap:label="Order for OMPA View" sap:content-version="1">
+        <Key>
+            <PropertyRef Name="OrderNumber"/>
+            <PropertyRef Name="OperationNumber"/>
+        </Key>
+        <Property Name="OrderNumber" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Order"/>
+        <Property Name="OperationNumber" Type="Edm.String" Nullable="false" MaxLength="4" sap:display-format="UpperCase" sap:label="Activity"/>
+        <Property Name="RoutingOperationNumber" Type="Edm.String" MaxLength="10" sap:display-format="NonNegative" sap:label="Opertn task list no."/>
+        <Property Name="OrderType" Type="Edm.String" MaxLength="4" sap:display-format="UpperCase" sap:label="Order Type"/>
+        <Property Name="WorkCenter" Type="Edm.String" MaxLength="8" sap:display-format="UpperCase" sap:label="Work center"/>
+        <Property Name="BeginDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label="Earl. start / date"/>
+        <Property Name="BeginTime" Type="Edm.Time" Precision="0" sap:label="Earl. start / time"/>
+        <Property Name="PersonelNumber" Type="Edm.String" MaxLength="8" sap:display-format="NonNegative" sap:label="Personnel Number"/>
+        <Property Name="Batch" Type="Edm.Byte" sap:label="Split number"/>
+        <Property Name="OperationText" Type="Edm.String" MaxLength="40" sap:label="Operation short text"/>
+        <Property Name="WorkInvolved" Type="Edm.Decimal" Precision="10" Scale="1" sap:label=""/>
+        <Property Name="PostCode" Type="Edm.String" MaxLength="10" sap:display-format="UpperCase" sap:label="Postal Code"/>
+        <Property Name="City" Type="Edm.String" MaxLength="40" sap:label="City"/>
+        <Property Name="Street" Type="Edm.String" MaxLength="60" sap:label="Street"/>
+        <Property Name="StreetNumber" Type="Edm.String" MaxLength="10" sap:label="House Number"/>
+        <Property Name="Status" Type="Edm.String" MaxLength="20"/>
+        <NavigationProperty Name="to_depaecr2" Relationship="ZGP_PM_OMPA_SRV.assoc_E257B3AD5C6508E54E0E6C4C0F318B44" FromRole="FromRole_assoc_E257B3AD5C6508E54E0E6C4C0F318B44" ToRole="ToRole_assoc_E257B3AD5C6508E54E0E6C4C0F318B44"/>
+        <NavigationProperty Name="to_items" Relationship="ZGP_PM_OMPA_SRV.assoc_F5BE35D8C1EE0DEAB3022BD122B3E423" FromRole="FromRole_assoc_F5BE35D8C1EE0DEAB3022BD122B3E423" ToRole="ToRole_assoc_F5BE35D8C1EE0DEAB3022BD122B3E423"/>
+        <NavigationProperty Name="to_itemsadmin" Relationship="ZGP_PM_OMPA_SRV.assoc_89D69347EEFC2505F2E50A5FCAECC84D" FromRole="FromRole_assoc_89D69347EEFC2505F2E50A5FCAECC84D" ToRole="ToRole_assoc_89D69347EEFC2505F2E50A5FCAECC84D"/>
+        <NavigationProperty Name="to_split" Relationship="ZGP_PM_OMPA_SRV.assoc_AA5C1ABADECFC52A710E24B22735BBF5" FromRole="FromRole_assoc_AA5C1ABADECFC52A710E24B22735BBF5" ToRole="ToRole_assoc_AA5C1ABADECFC52A710E24B22735BBF5"/>
+    </EntityType>
+    <Association Name="assoc_E257B3AD5C6508E54E0E6C4C0F318B44" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDERType" Multiplicity="1" Role="FromRole_assoc_E257B3AD5C6508E54E0E6C4C0F318B44"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type" Multiplicity="0..1" Role="ToRole_assoc_E257B3AD5C6508E54E0E6C4C0F318B44"/>
+    </Association>
+    <Association Name="assoc_F5BE35D8C1EE0DEAB3022BD122B3E423" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDERType" Multiplicity="1" Role="FromRole_assoc_F5BE35D8C1EE0DEAB3022BD122B3E423"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDER_ITEMSType" Multiplicity="*" Role="ToRole_assoc_F5BE35D8C1EE0DEAB3022BD122B3E423"/>
+    </Association>
+    <Association Name="assoc_89D69347EEFC2505F2E50A5FCAECC84D" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDERType" Multiplicity="1" Role="FromRole_assoc_89D69347EEFC2505F2E50A5FCAECC84D"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDER_ITEMS_ADMINType" Multiplicity="*" Role="ToRole_assoc_89D69347EEFC2505F2E50A5FCAECC84D"/>
+    </Association>
+    <Association Name="assoc_AA5C1ABADECFC52A710E24B22735BBF5" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDERType" Multiplicity="1" Role="FromRole_assoc_AA5C1ABADECFC52A710E24B22735BBF5"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_SPLITType" Multiplicity="*" Role="ToRole_assoc_AA5C1ABADECFC52A710E24B22735BBF5"/>
+    </Association>
+    <Association Name="assoc_BDDCE103977458D66469E7F174C764A9" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_H_DEPA_ELEC_FCLOType" Multiplicity="1" Role="FromRole_assoc_BDDCE103977458D66469E7F174C764A9"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_H_DEPA_ELEC_FCLOType" Multiplicity="0..1" Role="ToRole_assoc_BDDCE103977458D66469E7F174C764A9"/>
+    </Association>
+    <Association Name="assoc_EE0174FE45D4451E57D43F1F27F76435" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_H_DEPA_ELEC_FCLOType" Multiplicity="1" Role="FromRole_assoc_EE0174FE45D4451E57D43F1F27F76435"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_H_DEPA_ELEC_FCLOType" Multiplicity="0..1" Role="ToRole_assoc_EE0174FE45D4451E57D43F1F27F76435"/>
+    </Association>
+    <Association Name="assoc_2C132C1449BA3D546EB01FD199876E2C" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type" Multiplicity="1" Role="FromRole_assoc_2C132C1449BA3D546EB01FD199876E2C"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_H_ACTION_HELPType" Multiplicity="0..1" Role="ToRole_assoc_2C132C1449BA3D546EB01FD199876E2C"/>
+    </Association>
+    <Association Name="assoc_18D66714495070AE1A2368EE020A641D" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type" Multiplicity="1" Role="FromRole_assoc_18D66714495070AE1A2368EE020A641D"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_H_ACTION2_HELPType" Multiplicity="0..1" Role="ToRole_assoc_18D66714495070AE1A2368EE020A641D"/>
+    </Association>
+    <Association Name="assoc_99235A5D23665FD240D16ABB82168A65" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type" Multiplicity="1" Role="FromRole_assoc_99235A5D23665FD240D16ABB82168A65"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_H_CAUSE_HELPType" Multiplicity="0..1" Role="ToRole_assoc_99235A5D23665FD240D16ABB82168A65"/>
+    </Association>
+    <Association Name="assoc_DA603D1F804DDD394FBB48055D786CC6" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type" Multiplicity="1" Role="FromRole_assoc_DA603D1F804DDD394FBB48055D786CC6"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_H_CAUSE2_HELPType" Multiplicity="0..1" Role="ToRole_assoc_DA603D1F804DDD394FBB48055D786CC6"/>
+    </Association>
+    <Association Name="assoc_201C6F6E753E412511D9DA448EFF3706" sap:content-version="1">
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type" Multiplicity="1" Role="FromRole_assoc_201C6F6E753E412511D9DA448EFF3706"/>
+        <End Type="ZGP_PM_OMPA_SRV.ZV_PM_H_DEPA_ELEC_FCLOType" Multiplicity="*" Role="ToRole_assoc_201C6F6E753E412511D9DA448EFF3706"/>
+    </Association>
+    <EntityContainer Name="ZGP_PM_OMPA_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
+        <EntitySet Name="ZV_HR_B_PA0001_MAXENDDATE" EntityType="ZGP_PM_OMPA_SRV.ZV_HR_B_PA0001_MAXENDDATEType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_H_CAUSE_HELP" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_H_CAUSE_HELPType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_B_OMPA_ORDER_ITEMS_ADMIN" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDER_ITEMS_ADMINType" sap:creatable="false" sap:deletable="false" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_H_DEPA_ELEC_FCLO" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_H_DEPA_ELEC_FCLOType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_H_OMPA_STATUS" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_H_OMPA_STATUSType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_H_ORDER" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_H_ORDERType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_H_ORDERTYPE" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_H_ORDERTYPEType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_H_WORKCENTER" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_H_WORKCENTERType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_H_ACTION2_HELP" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_H_ACTION2_HELPType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_B_OMPA_ORDER_ITEMS" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDER_ITEMSType" sap:deletable="false" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_B_OMPA_SPLIT" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_SPLITType" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_B_USERS" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_B_USERSType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_C_DEPA_ECR2" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type" sap:creatable="false" sap:deletable="false" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_H_ACTION_HELP" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_H_ACTION_HELPType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_H_CAUSE2_HELP" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_H_CAUSE2_HELPType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+        <EntitySet Name="ZV_PM_B_OMPA_ORDER" EntityType="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDERType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+        <AssociationSet Name="assoc_2C132C1449BA3D546EB01FD199876E2C" Association="ZGP_PM_OMPA_SRV.assoc_2C132C1449BA3D546EB01FD199876E2C" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_C_DEPA_ECR2" Role="FromRole_assoc_2C132C1449BA3D546EB01FD199876E2C"/>
+            <End EntitySet="ZV_PM_H_ACTION_HELP" Role="ToRole_assoc_2C132C1449BA3D546EB01FD199876E2C"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_E257B3AD5C6508E54E0E6C4C0F318B44" Association="ZGP_PM_OMPA_SRV.assoc_E257B3AD5C6508E54E0E6C4C0F318B44" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_B_OMPA_ORDER" Role="FromRole_assoc_E257B3AD5C6508E54E0E6C4C0F318B44"/>
+            <End EntitySet="ZV_PM_C_DEPA_ECR2" Role="ToRole_assoc_E257B3AD5C6508E54E0E6C4C0F318B44"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_DA603D1F804DDD394FBB48055D786CC6" Association="ZGP_PM_OMPA_SRV.assoc_DA603D1F804DDD394FBB48055D786CC6" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_C_DEPA_ECR2" Role="FromRole_assoc_DA603D1F804DDD394FBB48055D786CC6"/>
+            <End EntitySet="ZV_PM_H_CAUSE2_HELP" Role="ToRole_assoc_DA603D1F804DDD394FBB48055D786CC6"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_AA5C1ABADECFC52A710E24B22735BBF5" Association="ZGP_PM_OMPA_SRV.assoc_AA5C1ABADECFC52A710E24B22735BBF5" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_B_OMPA_ORDER" Role="FromRole_assoc_AA5C1ABADECFC52A710E24B22735BBF5"/>
+            <End EntitySet="ZV_PM_B_OMPA_SPLIT" Role="ToRole_assoc_AA5C1ABADECFC52A710E24B22735BBF5"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_18D66714495070AE1A2368EE020A641D" Association="ZGP_PM_OMPA_SRV.assoc_18D66714495070AE1A2368EE020A641D" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_C_DEPA_ECR2" Role="FromRole_assoc_18D66714495070AE1A2368EE020A641D"/>
+            <End EntitySet="ZV_PM_H_ACTION2_HELP" Role="ToRole_assoc_18D66714495070AE1A2368EE020A641D"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_F5BE35D8C1EE0DEAB3022BD122B3E423" Association="ZGP_PM_OMPA_SRV.assoc_F5BE35D8C1EE0DEAB3022BD122B3E423" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_B_OMPA_ORDER" Role="FromRole_assoc_F5BE35D8C1EE0DEAB3022BD122B3E423"/>
+            <End EntitySet="ZV_PM_B_OMPA_ORDER_ITEMS" Role="ToRole_assoc_F5BE35D8C1EE0DEAB3022BD122B3E423"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_99235A5D23665FD240D16ABB82168A65" Association="ZGP_PM_OMPA_SRV.assoc_99235A5D23665FD240D16ABB82168A65" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_C_DEPA_ECR2" Role="FromRole_assoc_99235A5D23665FD240D16ABB82168A65"/>
+            <End EntitySet="ZV_PM_H_CAUSE_HELP" Role="ToRole_assoc_99235A5D23665FD240D16ABB82168A65"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_201C6F6E753E412511D9DA448EFF3706" Association="ZGP_PM_OMPA_SRV.assoc_201C6F6E753E412511D9DA448EFF3706" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_C_DEPA_ECR2" Role="FromRole_assoc_201C6F6E753E412511D9DA448EFF3706"/>
+            <End EntitySet="ZV_PM_H_DEPA_ELEC_FCLO" Role="ToRole_assoc_201C6F6E753E412511D9DA448EFF3706"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_89D69347EEFC2505F2E50A5FCAECC84D" Association="ZGP_PM_OMPA_SRV.assoc_89D69347EEFC2505F2E50A5FCAECC84D" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_B_OMPA_ORDER" Role="FromRole_assoc_89D69347EEFC2505F2E50A5FCAECC84D"/>
+            <End EntitySet="ZV_PM_B_OMPA_ORDER_ITEMS_ADMIN" Role="ToRole_assoc_89D69347EEFC2505F2E50A5FCAECC84D"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_BDDCE103977458D66469E7F174C764A9" Association="ZGP_PM_OMPA_SRV.assoc_BDDCE103977458D66469E7F174C764A9" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_H_DEPA_ELEC_FCLO" Role="FromRole_assoc_BDDCE103977458D66469E7F174C764A9"/>
+            <End EntitySet="ZV_PM_H_DEPA_ELEC_FCLO" Role="ToRole_assoc_BDDCE103977458D66469E7F174C764A9"/>
+        </AssociationSet>
+        <AssociationSet Name="assoc_EE0174FE45D4451E57D43F1F27F76435" Association="ZGP_PM_OMPA_SRV.assoc_EE0174FE45D4451E57D43F1F27F76435" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+            <End EntitySet="ZV_PM_H_DEPA_ELEC_FCLO" Role="FromRole_assoc_EE0174FE45D4451E57D43F1F27F76435"/>
+            <End EntitySet="ZV_PM_H_DEPA_ELEC_FCLO" Role="ToRole_assoc_EE0174FE45D4451E57D43F1F27F76435"/>
+        </AssociationSet>
+    </EntityContainer>
+    <Annotations Target="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type/Cause"
+    xmlns="http://docs.oasis-open.org/odata/ns/edm">
+    <Annotation Term="Common.ValueList">
+        <Record>
+            <PropertyValue Property="Label" String="PM: Value Help cause avis"/>
+            <PropertyValue Property="CollectionPath" String="ZV_PM_H_CAUSE_HELP"/>
+            <PropertyValue Property="SearchSupported" Bool="true"/>
+            <PropertyValue Property="Parameters">
+                <Collection>
+                    <Record Type="Common.ValueListParameterInOut">
+                        <PropertyValue Property="LocalDataProperty" PropertyPath="Cause"/>
+                        <PropertyValue Property="ValueListProperty" String="Cause"/>
+                    </Record>
+                    <Record Type="Common.ValueListParameterDisplayOnly">
+                        <PropertyValue Property="ValueListProperty" String="Code"/>
+                    </Record>
+                    <Record Type="Common.ValueListParameterDisplayOnly">
+                        <PropertyValue Property="ValueListProperty" String="Codegruppe"/>
+                    </Record>
+                    <Record Type="Common.ValueListParameterDisplayOnly">
+                        <PropertyValue Property="ValueListProperty" String="Kurztext2"/>
+                    </Record>
+                </Collection>
+            </PropertyValue>
+        </Record>
+    </Annotation>
+</Annotations>
+<Annotations Target="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type/Cause2"
+xmlns="http://docs.oasis-open.org/odata/ns/edm">
+<Annotation Term="Common.ValueList">
+    <Record>
+        <PropertyValue Property="Label" String="PM: Causes Value Help champs 2"/>
+        <PropertyValue Property="CollectionPath" String="ZV_PM_H_CAUSE2_HELP"/>
+        <PropertyValue Property="SearchSupported" Bool="true"/>
+        <PropertyValue Property="Parameters">
+            <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                    <PropertyValue Property="LocalDataProperty" PropertyPath="Cause2"/>
+                    <PropertyValue Property="ValueListProperty" String="Cause2"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="codegruppe"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="code"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="kurztext"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="katalogart"/>
+                </Record>
+            </Collection>
+        </PropertyValue>
+    </Record>
+</Annotation>
+</Annotations>
+<Annotations Target="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type/Action"
+xmlns="http://docs.oasis-open.org/odata/ns/edm">
+<Annotation Term="Common.ValueList">
+    <Record>
+        <PropertyValue Property="Label" String="PM: Value Help cause avis"/>
+        <PropertyValue Property="CollectionPath" String="ZV_PM_H_ACTION_HELP"/>
+        <PropertyValue Property="SearchSupported" Bool="true"/>
+        <PropertyValue Property="Parameters">
+            <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                    <PropertyValue Property="LocalDataProperty" PropertyPath="Action"/>
+                    <PropertyValue Property="ValueListProperty" String="Action"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="Codegruppe"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="Kurztext2"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="Code"/>
+                </Record>
+            </Collection>
+        </PropertyValue>
+    </Record>
+</Annotation>
+</Annotations>
+<Annotations Target="ZGP_PM_OMPA_SRV.ZV_PM_C_DEPA_ECR2Type/Action2"
+xmlns="http://docs.oasis-open.org/odata/ns/edm">
+<Annotation Term="Common.ValueList">
+    <Record>
+        <PropertyValue Property="Label" String="PM: Action Value Help champs 2"/>
+        <PropertyValue Property="CollectionPath" String="ZV_PM_H_ACTION2_HELP"/>
+        <PropertyValue Property="SearchSupported" Bool="true"/>
+        <PropertyValue Property="Parameters">
+            <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                    <PropertyValue Property="LocalDataProperty" PropertyPath="Action2"/>
+                    <PropertyValue Property="ValueListProperty" String="Action2"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="codegruppe"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="code"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="kurztext"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                    <PropertyValue Property="ValueListProperty" String="katalogart"/>
+                </Record>
+            </Collection>
+        </PropertyValue>
+    </Record>
+</Annotation>
+</Annotations>
+<Annotations Target="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDER_ITEMSType"
+xmlns="http://docs.oasis-open.org/odata/ns/edm">
+<Annotation Term="Common.SemanticKey">
+    <Collection>
+        <PropertyPath>OrderNumber</PropertyPath>
+        <PropertyPath>OperationNumber</PropertyPath>
+        <PropertyPath>Batch</PropertyPath>
+        <PropertyPath>Counter</PropertyPath>
+        <PropertyPath>PersonelNumber</PropertyPath>
+    </Collection>
+</Annotation>
+</Annotations>
+<Annotations Target="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDERType"
+xmlns="http://docs.oasis-open.org/odata/ns/edm">
+<Annotation Term="Common.SemanticKey">
+    <Collection>
+        <PropertyPath>OrderNumber</PropertyPath>
+        <PropertyPath>OperationNumber</PropertyPath>
+    </Collection>
+</Annotation>
+</Annotations>
+<Annotations Target="ZGP_PM_OMPA_SRV.ZV_PM_B_OMPA_ORDER_ITEMS_ADMINType"
+xmlns="http://docs.oasis-open.org/odata/ns/edm">
+<Annotation Term="Common.SemanticKey">
+    <Collection>
+        <PropertyPath>OrderNumber</PropertyPath>
+        <PropertyPath>OperationNumber</PropertyPath>
+        <PropertyPath>Batch</PropertyPath>
+        <PropertyPath>Counter</PropertyPath>
+        <PropertyPath>PersonelNumber</PropertyPath>
+    </Collection>
+</Annotation>
+</Annotations>
+<atom:link rel="self" href="http://webdispdta.resa.be:45300/sap/opu/odata/sap/ZGP_PM_OMPA_SRV/$metadata"
+xmlns:atom="http://www.w3.org/2005/Atom"/>
+<atom:link rel="latest-version" href="http://webdispdta.resa.be:45300/sap/opu/odata/sap/ZGP_PM_OMPA_SRV/$metadata"
+xmlns:atom="http://www.w3.org/2005/Atom"/>
+</Schema>
+</edmx:DataServices>
+</edmx:Edmx>

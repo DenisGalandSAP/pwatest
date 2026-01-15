@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-cache-v11';
+const CACHE_NAME = 'offline-cache-v16';
 const URLS_TO_CACHE = [
     'index.html',
     'pwamanifest.json',
@@ -32,7 +32,7 @@ self.addEventListener('activate', (event) => {
                 return Promise.all(
                     cacheKeys.map((key) => {
                         // Only delete caches that start with 'offline-cache-' and are not the current cache
-                        if (key.startsWith('offline-cache-') && key !== CACHE_NAME) {
+                        if (key !== CACHE_NAME) {
                             console.log('Deleting old cache:', key);
                             return caches.delete(key);
                         }
@@ -44,6 +44,11 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Ignore chrome extensions and other non-http protocols
+    if (!event.request.url.startsWith('http')) {
+        return;
+    }
+
     // 1. Navigation requests (HTML pages) -> Network first, fall back to Cache, then Offline Page
     if (event.request.mode === 'navigate') {
         event.respondWith(
@@ -62,8 +67,7 @@ self.addEventListener('fetch', (event) => {
     // We use Cache First here for performance and offline capability.
     // Ideally, we'd version the cache or use Stale-While-Revalidate, 
     // but Cache First is safer for "fully offline" requirements.
-    if (event.request.url.includes('/resources/') || 
-        event.request.url.includes('/test-resources/')) {
+    if (event.request.url.includes('/resources/')) {
         event.respondWith(
             caches.open(CACHE_NAME).then((cache) => {
                 return cache.match(event.request).then((response) => {

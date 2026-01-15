@@ -15,6 +15,13 @@
       "destination": "ui5"
     },
     {
+      "source": "^/sap/(.*)$",
+      "target": "/sap/$1",
+      "destination": "DTA310-PP",
+      "authenticationType": "xsuaa",
+      "csrfProtection": false
+    },
+    {
       "source": "^(.*)$",
       "target": "$1",
       "service": "html5-apps-repo-rt",
