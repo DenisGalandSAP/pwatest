@@ -15,6 +15,21 @@
       "destination": "ui5"
     },
     {
+      "source": "^/pwamanifest.json$",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "none"
+    },
+    {
+      "source": "^/sw.js$",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "none"
+    },
+    {
+      "source": "^/offline.html$",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "none"
+    },
+    {
       "source": "^(.*)$",
       "target": "$1",
       "service": "html5-apps-repo-rt",

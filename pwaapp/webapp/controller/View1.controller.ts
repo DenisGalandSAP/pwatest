@@ -1,3 +1,4 @@
+import Event from "sap/ui/base/Event";
 import Controller from "sap/ui/core/mvc/Controller";
 
 /**
@@ -9,4 +10,7 @@ export default class View1 extends Controller {
     public onInit(): void {
 
     }
+    onButtonPress(oEvent: Event): void {
+        alert("Button Pressed");
+    };
 }

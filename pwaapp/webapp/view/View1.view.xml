@@ -2,5 +2,6 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">
     <Page id="page" title="{i18n>title}">
+        <Button id="myButton" text="Click Me" press=".onButtonPress" />
     </Page>
 </mvc:View>
