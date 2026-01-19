@@ -41,19 +41,12 @@ server:
           - url: http://webdispdta.resa.be:45300
             destination: DTA310-PP
             path: /sap
-          - url: http://webdispdta.resa.be:45300
-            destination: DTA310-PP
-            path: /sap/opu/odata/sap/ZGP_PM_OMPA_SRV/
     - name: sap-fe-mockserver
       beforeMiddleware: csp
       configuration:
         mountPath: /
         services:
-          - urlPath: /sap/opu/odata/sap/ZGP_PM_INTENSE_SRV
-            metadataPath: ./webapp/localService/mainService/metadata.xml
-            mockdataPath: ./webapp/localService/mainService/data
-            generateMockData: true
-          - urlPath: /sap/opu/odata/sap/ZGP_PM_OMPA_SRV
+          - urlPath: /sap/opu/odata/sap/ZGP_DENUSER_SRV
             metadataPath: ./webapp/localService/mainService/metadata.xml
             mockdataPath: ./webapp/localService/mainService/data
             generateMockData: true

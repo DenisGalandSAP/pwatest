@@ -1,7 +1,18 @@
 <mvc:View controllerName="pwaapp.controller.View1"
     xmlns:mvc="sap.ui.core.mvc"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
+    xmlns:smartTable="sap.ui.comp.smarttable"
     xmlns="sap.m">
-    <Page id="page">
-        <Button id="myButton" text="Click Me" press=".onButtonPress" />
+    <Page id="page" title="{i18n>title}">
+        <headerContent>
+            <ObjectStatus text="{= ${view>/isOnline} ? ${i18n>statusOnline} : ${i18n>statusOffline} }" state="{view>/state}" icon="{view>/icon}" />
+        </headerContent>
+        <smartFilterBar:SmartFilterBar id="smartFilterBar" entitySet="zi_denuser" persistencyKey="SmartFilterBarKey">
+            <smartFilterBar:controlConfiguration>
+            </smartFilterBar:controlConfiguration>
+        </smartFilterBar:SmartFilterBar>
+        <smartTable:SmartTable id="smartTable" entitySet="zi_denuser" smartFilterId="smartFilterBar" tableType="ResponsiveTable" enableExport="true" useVariantManagement="true" useTablePersonalisation="true" header="Users" showRowCount="true" persistencyKey="SmartTableKey" enableAutoBinding="true">
+            <Table id="table" sticky="ColumnHeaders,HeaderToolbar"/>
+        </smartTable:SmartTable>
     </Page>
 </mvc:View>

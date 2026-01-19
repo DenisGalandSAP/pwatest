@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-cache-v16';
+const CACHE_NAME = 'offline-cache-v22';
 const URLS_TO_CACHE = [
     'index.html',
     'pwamanifest.json',
@@ -46,6 +46,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     // Ignore chrome extensions and other non-http protocols
     if (!event.request.url.startsWith('http')) {
+        return;
+    }
+
+    // Ignore non-GET requests (POST, PUT, DELETE, etc.)
+    if (event.request.method !== 'GET') {
         return;
     }
 
