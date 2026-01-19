@@ -5,7 +5,7 @@
     xmlns="sap.m">
     <Page id="page" title="{i18n>title}">
         <headerContent>
-            <ObjectStatus text="{= ${view>/isOnline} ? ${i18n>statusOnline} : ${i18n>statusOffline} }" state="{view>/state}" icon="{view>/icon}" />
+            <ObjectStatus id="objectstatusid" text="{= ${view>/isOnline} ? ${i18n>statusOnline} : ${i18n>statusOffline} }" state="{view>/state}" icon="{view>/icon}" />
         </headerContent>
         <smartFilterBar:SmartFilterBar id="smartFilterBar" entitySet="zi_denuser" persistencyKey="SmartFilterBarKey">
             <smartFilterBar:controlConfiguration>

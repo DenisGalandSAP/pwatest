@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-cache-v22';
+const CACHE_NAME = 'offline-cache-v27';
 const URLS_TO_CACHE = [
     'index.html',
     'pwamanifest.json',
@@ -80,6 +80,67 @@ self.addEventListener('fetch', (event) => {
                         cache.put(event.request, networkResponse.clone());
                         return networkResponse;
                     });
+                });
+            })
+        );
+        return;
+    }
+
+    // Special handling for ZGP_DENUSER_SRV/zi_denuser to support offline from IndexedDB
+    if (event.request.url.includes('/sap/opu/odata/sap/ZGP_DENUSER_SRV/zi_denuser')) {
+        event.respondWith(
+            fetch(event.request).catch(() => {
+                return new Promise((resolve, reject) => {
+                    const dbName = "pwaapp-db";
+                    const storeName = "odata-store";
+                    // match the key used in Component.ts: relative path might be tricky if sw sees full url.
+                    // Component.ts used: "/sap/opu/odata/sap/ZGP_DENUSER_SRV/zi_denuser"
+                    // Helper to get relative path matches or just use the known key
+                    const key = "/sap/opu/odata/sap/ZGP_DENUSER_SRV/zi_denuser"; 
+                    
+                    // Open with version 2 to match Component.ts
+                    const request = indexedDB.open(dbName, 2);
+                    
+                    request.onsuccess = (e) => {
+                        const db = e.target.result;
+                        // Check if store exists first
+                        if (!db.objectStoreNames.contains(storeName)) {
+                             // Fallback if db exists but store doesn't (weird state but possible)
+                            resolve(new Response('{"d":{"results":[]}}', {
+                                headers: { 'Content-Type': 'application/json' }
+                            }));
+                            return;
+                        }
+
+                        const transaction = db.transaction([storeName], "readonly");
+                        const store = transaction.objectStore(storeName);
+                        const getRequest = store.get(key);
+                        
+                        getRequest.onsuccess = () => {
+                            if (getRequest.result) {
+                                resolve(new Response(JSON.stringify(getRequest.result), {
+                                    headers: { 'Content-Type': 'application/json' }
+                                }));
+                            } else {
+                                // No data found, return empty result
+                                resolve(new Response('{"d":{"results":[]}}', {
+                                    headers: { 'Content-Type': 'application/json' }
+                                }));
+                            }
+                        };
+                        getRequest.onerror = () => {
+                             resolve(new Response('{"d":{"results":[]}}', {
+                                headers: { 'Content-Type': 'application/json' }
+                            }));
+                        };
+                    };
+                    
+                    request.onerror = (e) => {
+                         // DB open failed
+                         resolve(new Response('{"d":{"results":[]}}', {
+                                headers: { 'Content-Type': 'application/json' }
+                        }));
+                    };
                 });
             })
         );
