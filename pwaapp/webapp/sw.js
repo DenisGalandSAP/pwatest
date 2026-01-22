@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-cache-v40';
+const CACHE_NAME = 'offline-cache-v44';
 const URLS_TO_CACHE = [
     'index.html',
     'pwamanifest.json',
@@ -143,7 +143,26 @@ self.addEventListener('fetch', (event) => {
                         countReq.onsuccess = () => {
                             let countVal = 0;
                             if (countReq.result && countReq.result.d && Array.isArray(countReq.result.d.results)) {
-                                countVal = countReq.result.d.results.length;
+                                let results = countReq.result.d.results;
+
+                                // Apply filters to count
+                                const params = parsedUrl.searchParams;
+                                const filter = params.get('$filter');
+
+                                if (filter) {
+                                    const substringMatch = /substringof\('([^']*)',\s*([a-zA-Z0-9_.]+)\)/.exec(filter);
+                                    if (substringMatch) {
+                                        const searchVal = substringMatch[1];
+                                        const propName = substringMatch[2];
+                                        results = results.filter(item => {
+                                            return item[propName] && String(item[propName]).includes(searchVal);
+                                        });
+                                    } else {
+                                        results = [];
+                                    }
+                                }
+
+                                countVal = results.length;
                             }
                             console.log('[SW] Returning offline count:', countVal);
                             resolve(new Response(countVal.toString(), {
@@ -164,9 +183,84 @@ self.addEventListener('fetch', (event) => {
                     getRequest.onsuccess = () => {
                         if (getRequest.result) {
                             console.log('[SW] Data found in IndexedDB for key:', key);
-                            resolve(new Response(JSON.stringify(getRequest.result), {
-                                headers: { 'Content-Type': 'application/json' }
-                            }));
+
+                            let data = getRequest.result;
+
+                            // Check if we need to apply OData system query options ($skip, $top, $select)
+                            // We only apply this if it looks like a collection (has d.results array)
+                            if (data && data.d && Array.isArray(data.d.results)) {
+                                let results = [...data.d.results]; // Clone array
+
+                                const params = parsedUrl.searchParams;
+                                const skip = parseInt(params.get('$skip') || '0', 10);
+                                const top = parseInt(params.get('$top') || '0', 10);
+                                const select = params.get('$select');
+                                const filter = params.get('$filter');
+
+                                // Apply $filter
+                                if (filter) {
+                                    // Parse filter once
+                                    // Basic support for substringof('Value', Property)
+                                    // Example: substringof('USER',Username) inside URL: $filter=substringof('USER',Username)
+                                    // Regex allows for dots in property names e.g. To.Property
+                                    const substringMatch = /substringof\('([^']*)',\s*([a-zA-Z0-9_.]+)\)/.exec(filter);
+                                    
+                                    if (substringMatch) {
+                                        const searchVal = substringMatch[1];
+                                        const propName = substringMatch[2];
+                                        results = results.filter(item => {
+                                            return item[propName] && String(item[propName]).includes(searchVal);
+                                        });
+                                    } else {
+                                        // If filter is provided but we can't parse it (or it's not substringof),
+                                        // we return NO results to avoid "leaking" all data when a filter was expected.
+                                        console.warn('[SW] Unhandled $filter expression:', filter);
+                                        results = [];
+                                    }
+                                }
+
+                                // Apply $skip
+                                if (skip > 0) {
+                                    results = results.slice(skip);
+                                }
+
+                                // Apply $top
+                                if (top > 0) {
+                                    results = results.slice(0, top);
+                                }
+
+                                // Apply $select
+                                if (select) {
+                                    const fields = select.split(',').map(f => f.trim());
+                                    results = results.map(item => {
+                                        const newItem = {};
+                                        // Keep metadata if exists
+                                        if (item.__metadata) newItem.__metadata = item.__metadata;
+
+                                        fields.forEach(field => {
+                                            if (Object.prototype.hasOwnProperty.call(item, field)) {
+                                                newItem[field] = item[field];
+                                            }
+                                        });
+                                        return newItem;
+                                    });
+                                }
+
+                                // Construct new response object
+                                const responseData = {
+                                    d: {
+                                        results: results
+                                    }
+                                };
+                                
+                                resolve(new Response(JSON.stringify(responseData), {
+                                    headers: { 'Content-Type': 'application/json' }
+                                }));
+                            } else {
+                                resolve(new Response(JSON.stringify(getRequest.result), {
+                                    headers: { 'Content-Type': 'application/json' }
+                                }));
+                            }
                         } else {
                             console.warn('[SW] No data found in IndexedDB for key:', key);
                             resolve(new Response('{"d":{"results":[]}}', {

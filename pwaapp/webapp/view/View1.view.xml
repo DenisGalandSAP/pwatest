@@ -12,7 +12,7 @@
             </smartFilterBar:controlConfiguration>
         </smartFilterBar:SmartFilterBar>
         <smartTable:SmartTable id="smartTable" entitySet="zi_denuser" smartFilterId="smartFilterBar" tableType="ResponsiveTable" enableExport="true" useVariantManagement="true" useTablePersonalisation="true" header="Users" showRowCount="true" persistencyKey="SmartTableKey" enableAutoBinding="true">
-            <Table id="table" sticky="ColumnHeaders,HeaderToolbar"/>
+            <Table id="table" sticky="ColumnHeaders,HeaderToolbar" growing="true" growingThreshold="20"/>
         </smartTable:SmartTable>
     </Page>
 </mvc:View>
