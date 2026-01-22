@@ -3,7 +3,7 @@
     xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
     xmlns:smartTable="sap.ui.comp.smarttable"
     xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
+    <Page id="page">
         <headerContent>
             <ObjectStatus id="objectstatusid" text="{= ${view>/isOnline} ? ${i18n>statusOnline} : ${i18n>statusOffline} }" state="{view>/state}" icon="{view>/icon}" />
         </headerContent>
