@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-cache-v44';
+const CACHE_NAME = 'offline-cache-v45';
 const URLS_TO_CACHE = [
     'index.html',
     'pwamanifest.json',
@@ -92,22 +92,146 @@ self.addEventListener('fetch', (event) => {
         // Helper function to query IndexedDB
         const getFromDB = () => {
             return new Promise((resolve, reject) => {
+                const applyODataFilter = (data, filterStr) => {
+                    if (!filterStr) return data;
+                    
+                    const tokenize = (str) => {
+                        const tokens = [];
+                        let i = 0;
+                        while (i < str.length) {
+                            const char = str[i];
+                            if (/\s/.test(char)) { i++; continue; }
+                            if (['(', ')', ','].includes(char)) { tokens.push({ type: 'PUNCTUATION', value: char }); i++; continue; }
+                            if (char === "'") {
+                                let val = ""; i++;
+                                while (i < str.length) {
+                                    if (str[i] === "'" && str[i+1] === "'") { val += "'"; i += 2; }
+                                    else if (str[i] === "'") { i++; break; }
+                                    else { val += str[i]; i++; }
+                                }
+                                tokens.push({ type: 'STRING', value: val });
+                                continue;
+                            }
+                            if (/[\d\-]/.test(char)) {
+                                let val = char; i++;
+                                while (i < str.length && /[\d\.]/.test(str[i])) { val += str[i]; i++; }
+                                tokens.push({ type: 'NUMBER', value: parseFloat(val) });
+                                continue;
+                            }
+                            if (/[a-zA-Z_]/.test(char)) {
+                                let val = char; i++;
+                                while (i < str.length && /[a-zA-Z0-9_\./]/.test(str[i])) { val += str[i]; i++; }
+                                const kws = ['eq', 'ne', 'gt', 'ge', 'lt', 'le', 'and', 'or', 'not', 'null', 'true', 'false'];
+                                tokens.push({ type: kws.includes(val.toLowerCase()) ? 'KEYWORD' : 'IDENTIFIER', value: val });
+                                continue;
+                            }
+                            i++;
+                        }
+                        return tokens;
+                    };
+
+                    const parse = (tokens) => {
+                        let pos = 0;
+                        const peek = () => tokens[pos];
+                        const consume = () => tokens[pos++];
+                        
+                        const parsePrimary = () => {
+                            const t = peek();
+                            if (!t) throw new Error("Unexpected end");
+                            if (t.type === 'PUNCTUATION' && t.value === '(') {
+                                consume(); const expr = parseExpression(); consume(); return expr;
+                            }
+                            if (t.type === 'STRING' || t.type === 'NUMBER') { consume(); return { type: 'LITERAL', value: t.value }; }
+                            if (t.type === 'KEYWORD' && (t.value === 'true' || t.value === 'false')) { consume(); return { type: 'LITERAL', value: t.value === 'true' }; }
+                            if (t.type === 'KEYWORD' && t.value === 'null') { consume(); return { type: 'LITERAL', value: null }; }
+                            if (t.type === 'IDENTIFIER') {
+                                const name = consume().value;
+                                if (peek() && peek().type === 'PUNCTUATION' && peek().value === '(') {
+                                    consume(); const args = [];
+                                    if (peek().value !== ')') {
+                                        while (true) { args.push(parseExpression()); if (peek().value === ')') break; if (peek() && peek().value === ',') consume(); else break; }
+                                    }
+                                    consume(); return { type: 'CALL', method: name, args };
+                                }
+                                return { type: 'PROPERTY', name };
+                            }
+                            if (t.type === 'KEYWORD' && t.value === 'not') { consume(); return { type: 'UNARY', operator: 'not', right: parsePrimary() }; }
+                            throw new Error("Unknown token");
+                        };
+                        
+                        const parseComparison = () => {
+                            let left = parsePrimary();
+                            const t = peek();
+                            if (t && t.type === 'KEYWORD' && ['eq', 'ne', 'gt', 'ge', 'lt', 'le'].includes(t.value)) {
+                                const op = consume().value; const right = parsePrimary(); return { type: 'BINARY', operator: op, left, right };
+                            }
+                            return left;
+                        };
+                        const parseAnd = () => {
+                            let left = parseComparison();
+                            while (peek() && peek().type === 'KEYWORD' && peek().value === 'and') { consume(); left = { type: 'BINARY', operator: 'and', left, right: parseComparison() }; }
+                            return left;
+                        };
+                        const parseExpression = () => {
+                            let left = parseAnd();
+                            while (peek() && peek().type === 'KEYWORD' && peek().value === 'or') { consume(); left = { type: 'BINARY', operator: 'or', left, right: parseAnd() }; }
+                            return left;
+                        };
+                        return parseExpression();
+                    };
+
+                    const evaluate = (node, item) => {
+                        if (!node) return false;
+                        if (node.type === 'LITERAL') return node.value;
+                        if (node.type === 'PROPERTY') {
+                            return node.name.split('/').reduce((obj, key) => (obj && obj[key] !== undefined) ? obj[key] : null, item);
+                        }
+                        if (node.type === 'UNARY') return !evaluate(node.right, item);
+                        if (node.type === 'BINARY') {
+                            const l = evaluate(node.left, item); const r = evaluate(node.right, item);
+                            switch (node.operator) {
+                                case 'eq': return l == r;
+                                case 'ne': return l != r;
+                                case 'gt': return l > r;
+                                case 'ge': return l >= r;
+                                case 'lt': return l < r;
+                                case 'le': return l <= r;
+                                case 'and': return l && r;
+                                case 'or': return l || r;
+                            }
+                        }
+                        if (node.type === 'CALL') {
+                            const args = node.args.map(a => evaluate(a, item));
+                            const fn = node.method.toLowerCase();
+                            if (fn === 'substringof') return String(args[1]||'').includes(String(args[0]||'')); 
+                            if (fn === 'startswith') return String(args[0]||'').startsWith(String(args[1]||''));
+                            if (fn === 'endswith') return String(args[0]||'').endsWith(String(args[1]||''));
+                            if (fn === 'tolower') return String(args[0]||'').toLowerCase();
+                            if (fn === 'toupper') return String(args[0]||'').toUpperCase();
+                            if (fn === 'indexof') return String(args[0]||'').indexOf(String(args[1]||''));
+                        }
+                        return false;
+                    };
+
+                    try {
+                        const tokens = tokenize(filterStr);
+                        const ast = parse(tokens);
+                        return data.filter(item => evaluate(ast, item));
+                    } catch (e) {
+                        console.warn("[SW] Filter Parsing Error:", e);
+                        return [];
+                    }
+                };
+
                 console.log('[SW] Attempting to retrieve from IndexedDB for:', event.request.url);
                 const dbName = "pwaapp-db";
                 const storeName = "odata-store";
                 
-                // Derive the key from the request URL path.
-                // Decode URI component to handle encoded characters in URL if any
                 const parsedUrl = new URL(event.request.url);
                 let key = decodeURIComponent(parsedUrl.pathname);
                 
                 console.log('[SW] Original Key extracted:', key);
 
-                // Start: Fix path prefix issue
-                // The key stored in IndexedDB is "/sap/opu/odata/..." (from Component.ts)
-                // references: requestUrl = "/sap/opu/odata/sap/ZGP_DENUSER_SRV/zi_denuser";
-                // But the SW might see "/pwaapp/sap/opu/odata/..." depending on deployment.
-                // We normalize the key to start with "/sap/".
                 const sapIndex = key.indexOf('/sap/');
                 if (sapIndex >= 0) {
                     key = key.substring(sapIndex);
@@ -115,7 +239,6 @@ self.addEventListener('fetch', (event) => {
                 } else {
                      console.log('[SW] No /sap/ prefix found in key.');
                 }
-                // End: Fix path prefix issue
                 
                 const request = indexedDB.open(dbName, 3);
                 
@@ -132,11 +255,9 @@ self.addEventListener('fetch', (event) => {
                     const transaction = db.transaction([storeName], "readonly");
                     const store = transaction.objectStore(storeName);
 
-                    // Special handling for $count (counting the array in the parent entity)
+                    // Special handling for $count
                     if (key.endsWith('/$count')) {
                         console.log('[SW] Intercepted $count request');
-                        // Remove '/$count' to find the collection key
-                        // "key" is already normalized to start with /sap/...
                         const collectionKey = key.substring(0, key.length - 7); 
                         
                         const countReq = store.get(collectionKey);
@@ -150,16 +271,7 @@ self.addEventListener('fetch', (event) => {
                                 const filter = params.get('$filter');
 
                                 if (filter) {
-                                    const substringMatch = /substringof\('([^']*)',\s*([a-zA-Z0-9_.]+)\)/.exec(filter);
-                                    if (substringMatch) {
-                                        const searchVal = substringMatch[1];
-                                        const propName = substringMatch[2];
-                                        results = results.filter(item => {
-                                            return item[propName] && String(item[propName]).includes(searchVal);
-                                        });
-                                    } else {
-                                        results = [];
-                                    }
+                                    results = applyODataFilter(results, filter);
                                 }
 
                                 countVal = results.length;
@@ -170,7 +282,6 @@ self.addEventListener('fetch', (event) => {
                             }));
                         };
                         countReq.onerror = () => {
-                            // If fail, return 0
                              resolve(new Response('0', {
                                 headers: { 'Content-Type': 'text/plain' }
                             }));
@@ -186,10 +297,8 @@ self.addEventListener('fetch', (event) => {
 
                             let data = getRequest.result;
 
-                            // Check if we need to apply OData system query options ($skip, $top, $select)
-                            // We only apply this if it looks like a collection (has d.results array)
                             if (data && data.d && Array.isArray(data.d.results)) {
-                                let results = [...data.d.results]; // Clone array
+                                let results = [...data.d.results];
 
                                 const params = parsedUrl.searchParams;
                                 const skip = parseInt(params.get('$skip') || '0', 10);
@@ -197,27 +306,15 @@ self.addEventListener('fetch', (event) => {
                                 const select = params.get('$select');
                                 const filter = params.get('$filter');
 
-                                // Apply $filter
+                                // Apply $filter using the new advanced parser
                                 if (filter) {
-                                    // Parse filter once
-                                    // Basic support for substringof('Value', Property)
-                                    // Example: substringof('USER',Username) inside URL: $filter=substringof('USER',Username)
-                                    // Regex allows for dots in property names e.g. To.Property
-                                    const substringMatch = /substringof\('([^']*)',\s*([a-zA-Z0-9_.]+)\)/.exec(filter);
-                                    
-                                    if (substringMatch) {
-                                        const searchVal = substringMatch[1];
-                                        const propName = substringMatch[2];
-                                        results = results.filter(item => {
-                                            return item[propName] && String(item[propName]).includes(searchVal);
-                                        });
-                                    } else {
-                                        // If filter is provided but we can't parse it (or it's not substringof),
-                                        // we return NO results to avoid "leaking" all data when a filter was expected.
-                                        console.warn('[SW] Unhandled $filter expression:', filter);
-                                        results = [];
-                                    }
+                                    results = applyODataFilter(results, filter);
                                 }
+
+                                // Calculate count after filtering but BEFORE paging (top/skip)
+                                // This ensures $inlinecount represents the total matching items
+                                const totalCount = results.length;
+                                const inlineCount = params.get('$inlinecount');
 
                                 // Apply $skip
                                 if (skip > 0) {
@@ -246,12 +343,15 @@ self.addEventListener('fetch', (event) => {
                                     });
                                 }
 
-                                // Construct new response object
                                 const responseData = {
                                     d: {
                                         results: results
                                     }
                                 };
+
+                                if (inlineCount === 'allpages') {
+                                    responseData.d.__count = totalCount.toString();
+                                }
                                 
                                 resolve(new Response(JSON.stringify(responseData), {
                                     headers: { 'Content-Type': 'application/json' }

@@ -12,17 +12,19 @@
                     <Collection>
                         <PropertyPath>Username</PropertyPath>
                         <PropertyPath>Name</PropertyPath>
+                        <PropertyPath>Hobbies</PropertyPath>
                     </Collection>
                 </Annotation>
                 <Annotation Term="UI.LineItem">
                     <Collection>
                         <Record Type="UI.DataField">
                             <PropertyValue Property="Value" Path="Username"/>
-                            <PropertyValue Property="Label" String="User Name"/>
                         </Record>
                         <Record Type="UI.DataField">
                             <PropertyValue Property="Value" Path="Name"/>
-                            <PropertyValue Property="Label" String="Name 1"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Hobbies"/>
                         </Record>
                     </Collection>
                 </Annotation>
