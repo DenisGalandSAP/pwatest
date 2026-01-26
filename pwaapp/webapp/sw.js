@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-cache-v52';
+const CACHE_NAME = 'offline-cache-v54';
 const URLS_TO_CACHE = [
     'index.html',
     'pwamanifest.json',
@@ -334,6 +334,7 @@ self.addEventListener('fetch', (event) => {
                             }
 
                             if (data && data.d && Array.isArray(data.d.results)) {
+                                // ... existing collection processing ...
                                 let results = [...data.d.results];
 
                                 const params = parsedUrl.searchParams;
@@ -348,7 +349,6 @@ self.addEventListener('fetch', (event) => {
                                 }
 
                                 // Calculate count after filtering but BEFORE paging (top/skip)
-                                // This ensures $inlinecount represents the total matching items
                                 const totalCount = results.length;
                                 const inlineCount = params.get('$inlinecount');
 
@@ -384,31 +384,35 @@ self.addEventListener('fetch', (event) => {
                                         results: results
                                     }
                                 };
-
+                                
                                 if (inlineCount === 'allpages') {
-                                    responseData.d.__count = totalCount.toString();
+                                    responseData.d.__count = totalCount;
                                 }
 
                                 resolve(new Response(JSON.stringify(responseData), {
                                     headers: { 'Content-Type': 'application/json' }
                                 }));
                             } else {
-                                resolve(new Response(JSON.stringify(getRequest.result), {
+                                resolve(new Response('{"d":{"results":[]}}', {
                                     headers: { 'Content-Type': 'application/json' }
                                 }));
                             }
                         } else {
-                            console.warn('[SW] No data found in IndexedDB for key:', key);
-                            resolve(new Response('{"d":{"results":[]}}', {
-                                headers: { 'Content-Type': 'application/json' }
-                            }));
+                             // Data not found in DB
+                             console.warn('[SW] No data found in IndexedDB for key:', lookupKey);
+                             // Attempt to fallback to network if possible, or return empty if we are supposedly "handling" this offline path?
+                             // Since we are in the "Offline handler" block for a specific URL pattern, we should failing gracefully.
+                             // BUT, if we are ONLINE, we should have let the request pass through? 
+                             // The structure of the SW is:
+                             // event.respondWith( getFromDB().catch( () => fetch(...) ) ) 
+                             // We need to see how getFromDB is called.
+                             reject("No data in DB");
                         }
                     };
-                    getRequest.onerror = (err) => {
-                        console.error('[SW] IndexedDB get error:', err);
-                        resolve(new Response('{"d":{"results":[]}}', {
-                            headers: { 'Content-Type': 'application/json' }
-                        }));
+
+                    getRequest.onerror = () => {
+                        console.error('[SW] Error retrieving from IndexedDB');
+                        reject("DB Error");
                     };
                 };
 

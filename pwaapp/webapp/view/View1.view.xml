@@ -22,5 +22,11 @@
                 </items>
             </Table>
         </smartTable:SmartTable>
+        <footer>
+            <OverflowToolbar>
+                <Button icon="sap-icon://message-popup" text="{= ${message>/}.length }" type="Emphasized" press=".onMessageButtonPress" visible="{= ${message>/}.length > 0 }"/>
+                <ToolbarSpacer/>
+            </OverflowToolbar>
+        </footer>
     </Page>
 </mvc:View>

@@ -12,6 +12,9 @@ import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import MessageToast from "sap/m/MessageToast";
 import Table from "sap/m/Table";
 import { DialogType, ButtonType } from "sap/m/library";
+import OfflineQueue from "../utils/OfflineQueue";
+import MessagePopover from "sap/m/MessagePopover";
+import MessageItem from "sap/m/MessageItem";
 
 /**
  * @namespace pwaapp.controller
@@ -19,9 +22,17 @@ import { DialogType, ButtonType } from "sap/m/library";
 export default class View1 extends Controller {
     private _pCreateDialog: Promise<Dialog> | null = null;
     private _oCreateModel: JSONModel | null = null;
+    private _oMessagePopover: MessagePopover | null = null;
 
     /*eslint-disable @typescript-eslint/no-empty-function*/
     public onInit(): void {
+        this.getView()!.setModel(sap.ui.getCore().getMessageManager().getMessageModel(), "message");
+
+        OfflineQueue.init().then(() => {
+            if (navigator.onLine) {
+                this.processOfflineQueue();
+            }
+        });
 
         var sAppVersion = (this.getOwnerComponent() as any).getManifestEntry("/sap.app/applicationVersion/version");
         (this.byId("page") as Page).setTitle(sAppVersion);
@@ -45,6 +56,62 @@ export default class View1 extends Controller {
         oViewModel.setProperty("/state", bOnline ? "Success" : "Error");
         oViewModel.setProperty("/stateText", bOnline ? "Online" : "Offline");
         oViewModel.setProperty("/icon", bOnline ? "sap-icon://connected" : "sap-icon://disconnected");
+
+        if (bOnline) {
+            this.processOfflineQueue();
+        }
+    }
+
+    private async processOfflineQueue(): Promise<void> {
+        const aItems = await OfflineQueue.getAllItems();
+        if (aItems.length > 0) {
+            MessageToast.show("Syncing offline changes...");
+            OfflineQueue.clearMessages();
+            const oModel = this.getView()!.getModel() as ODataModel;
+
+            for (const item of aItems) {
+                try {
+                    await this.performAction(oModel, item);
+                    await OfflineQueue.removeItem(item.id!);
+                } catch (error) {
+                    console.error("Failed to sync item", item, error);
+                }
+            }
+            MessageToast.show("Sync complete");
+        }
+    }
+
+    private performAction(oModel: ODataModel, item: any): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (item.type === "create") {
+                oModel.create(item.path, item.payload, { success: () => resolve(), error: (e: any) => reject(e) });
+            } else if (item.type === "delete") {
+                oModel.remove(item.path, { success: () => resolve(), error: (e: any) => reject(e) });
+            } else if (item.type === "update") {
+                oModel.update(item.path, item.payload, { success: () => resolve(), error: (e: any) => reject(e) });
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    public onMessageButtonPress(oEvent: Event): void {
+        const oButton = oEvent.getSource() as Button;
+        if (!this._oMessagePopover) {
+            this._oMessagePopover = new MessagePopover({
+                items: {
+                    path: "message>/",
+                    template: new MessageItem({
+                        type: "{message>type}",
+                        title: "{message>message}",
+                        description: "{message>description}",
+                        subtitle: "{message>additionalText}"
+                    })
+                }
+            });
+            this.getView()!.addDependent(this._oMessagePopover);
+        }
+        this._oMessagePopover.toggle(oButton);
     }
 
     public onListItemPress(oEvent: Event): void {
@@ -67,13 +134,23 @@ export default class View1 extends Controller {
         }
 
         const sPath = oItem.getBindingContext()!.getPath();
+
+        if (!navigator.onLine) {
+            OfflineQueue.addToQueue("delete", sPath);
+            return;
+        }
+
         const oModel = this.getView()!.getModel() as ODataModel;
 
         oModel.remove(sPath, {
             success: () => {
                 MessageToast.show("User deleted");
             },
-            error: () => {
+            error: (oError: any) => {
+                if (oError.statusCode === "0" || oError.statusCode === 0 || oError.statusText === "NetworkError" || !oError.statusCode) {
+                     OfflineQueue.addToQueue("delete", sPath);
+                     return;
+                }
                 MessageToast.show("Error deleting user");
             }
         });
@@ -131,17 +208,30 @@ export default class View1 extends Controller {
         if (oData.Hobbies) {
             oData.Hobbies = parseInt(oData.Hobbies, 10);
         }
+
+        if (!navigator.onLine) {
+            OfflineQueue.addToQueue("create", "/zi_denuser", oData).then(() => {
+                oDialog.close();
+            });
+            return;
+        }
+
         const oModel = this.getView()!.getModel() as ODataModel;
 
         oModel.create("/zi_denuser", oData, {
             success: () => {
                 MessageToast.show("User created");
-                debugger;
                 oDialog.close();
             },
-            error: () => {
+            error: (oError: any) => {
+                // Check if likely a network error
+                if (oError.statusCode === "0" || oError.statusCode === 0 || oError.statusText === "NetworkError" || !oError.statusCode) {
+                     OfflineQueue.addToQueue("create", "/zi_denuser", oData).then(() => {
+                        oDialog.close();
+                     });
+                     return;
+                }
                 MessageToast.show("Error creating user");
-                debugger;
             }
         });
     }
