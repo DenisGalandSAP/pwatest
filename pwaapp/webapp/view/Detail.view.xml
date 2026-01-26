@@ -1,0 +1,29 @@
+<mvc:View controllerName="pwaapp.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:form="sap.ui.layout.form">
+    <Page id="detailPage" title="{i18n>detailTitle}" showNavButton="true" navButtonPress=".onNavBack">
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <form:SimpleForm title="Person Details" layout="ResponsiveGridLayout">
+                    <form:content>
+                        <Label text="Username" />
+                        <Input value="{Username}" editable="false" />
+                        <Label text="Name" />
+                        <Input value="{Name}" editable="{viewModel>/editable}" />
+                        <Label text="Hobbies" />
+                        <Input value="{Hobbies}" editable="{viewModel>/editable}" />
+                    </form:content>
+                </form:SimpleForm>
+            </VBox>
+        </content>
+        <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer />
+                <Button text="Edit" press=".onEdit" visible="{= !${viewModel>/editable}}" type="Emphasized" />
+                <Button text="Save" press=".onSave" visible="{viewModel>/editable}" type="Emphasized" />
+                <Button text="Cancel" press=".onCancel" visible="{viewModel>/editable}" />
+            </OverflowToolbar>
+        </footer>
+    </Page>
+</mvc:View>

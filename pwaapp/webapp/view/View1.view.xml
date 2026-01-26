@@ -7,12 +7,20 @@
         <headerContent>
             <ObjectStatus id="objectstatusid" text="{= ${view>/isOnline} ? ${i18n>statusOnline} : ${i18n>statusOffline} }" state="{view>/state}" icon="{view>/icon}" />
         </headerContent>
-        <smartFilterBar:SmartFilterBar id="smartFilterBar" entitySet="zi_denuser" persistencyKey="SmartFilterBarKey">
-            <smartFilterBar:controlConfiguration>
-            </smartFilterBar:controlConfiguration>
-        </smartFilterBar:SmartFilterBar>
+        <smartFilterBar:SmartFilterBar id="smartFilterBar" entitySet="zi_denuser" persistencyKey="SmartFilterBarKey"/>
         <smartTable:SmartTable id="smartTable" entitySet="zi_denuser" smartFilterId="smartFilterBar" tableType="ResponsiveTable" enableExport="true" useVariantManagement="true" useTablePersonalisation="true" header="Users" showRowCount="true" persistencyKey="SmartTableKey" enableAutoBinding="true">
-            <Table id="table" sticky="ColumnHeaders,HeaderToolbar" growing="true" growingThreshold="20"/>
+            <smartTable:customToolbar>
+                <OverflowToolbar>
+                    <ToolbarSpacer />
+                    <Button text="Create" press=".onCreate" type="Transparent" />
+                    <Button text="Delete" press=".onDelete" type="Transparent" />
+                </OverflowToolbar>
+            </smartTable:customToolbar>
+            <Table id="table" sticky="ColumnHeaders,HeaderToolbar" growing="true" growingThreshold="20" itemPress=".onListItemPress" mode="SingleSelectLeft">
+                <items>
+                    <ColumnListItem id="columnListItem" type="Navigation"/>
+                </items>
+            </Table>
         </smartTable:SmartTable>
     </Page>
 </mvc:View>

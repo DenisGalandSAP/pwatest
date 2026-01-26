@@ -36,7 +36,7 @@ export default class Component extends BaseComponent {
         const requestUrl = "/sap/opu/odata/sap/ZGP_DENUSER_SRV/zi_denuser";
 
         // Bump version to 3 to ensure we can recreate the store with correct options if needed
-        const request = indexedDB.open(dbName, 3);
+        const request = indexedDB.open(dbName, 4);
 
         request.onupgradeneeded = (event: any) => {
             const db = event.target.result;
@@ -89,15 +89,6 @@ export default class Component extends BaseComponent {
 
                             // Explicitly handle the put request result
                             const putRequest = store.put(wrappedData, requestUrl);
-
-                            // Also store individual entities so they can be accessed directly (e.g. for Detail views)
-                            results.forEach((entity: any) => {
-                                if (entity.Username) {
-                                    const entityUrl = `${requestUrl}('${entity.Username}')`;
-                                    // Wrap single entity in { d: ... } structure typical for OData V2
-                                    store.put({ d: entity }, entityUrl);
-                                }
-                            });
 
                             putRequest.onsuccess = () => {
                                 console.log("[Component] Offline cache updated from network data (IndexedDB)");

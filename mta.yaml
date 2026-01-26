@@ -78,6 +78,7 @@ resources:
             ProxyType: OnPremise
             Type: HTTP
             URL: http://webdispdta.resa.be:45300
+            sap-client: "310"
           existing_destinations_policy: update
       version: 1.0.0
     service: destination

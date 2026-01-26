@@ -1,8 +1,8 @@
-const CACHE_NAME = 'offline-cache-v45';
+const CACHE_NAME = 'offline-cache-v52';
 const URLS_TO_CACHE = [
     'index.html',
     'pwamanifest.json',
-    'resources/sap-ui-version.json' 
+    'resources/sap-ui-version.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -88,13 +88,13 @@ self.addEventListener('fetch', (event) => {
 
     // Special handling for ZGP_DENUSER_SRV/zi_denuser to support offline from IndexedDB
     if (event.request.url.includes('/sap/opu/odata/sap/ZGP_DENUSER_SRV/zi_denuser')) {
-        
+
         // Helper function to query IndexedDB
         const getFromDB = () => {
             return new Promise((resolve, reject) => {
                 const applyODataFilter = (data, filterStr) => {
                     if (!filterStr) return data;
-                    
+
                     const tokenize = (str) => {
                         const tokens = [];
                         let i = 0;
@@ -105,7 +105,7 @@ self.addEventListener('fetch', (event) => {
                             if (char === "'") {
                                 let val = ""; i++;
                                 while (i < str.length) {
-                                    if (str[i] === "'" && str[i+1] === "'") { val += "'"; i += 2; }
+                                    if (str[i] === "'" && str[i + 1] === "'") { val += "'"; i += 2; }
                                     else if (str[i] === "'") { i++; break; }
                                     else { val += str[i]; i++; }
                                 }
@@ -134,7 +134,7 @@ self.addEventListener('fetch', (event) => {
                         let pos = 0;
                         const peek = () => tokens[pos];
                         const consume = () => tokens[pos++];
-                        
+
                         const parsePrimary = () => {
                             const t = peek();
                             if (!t) throw new Error("Unexpected end");
@@ -158,7 +158,7 @@ self.addEventListener('fetch', (event) => {
                             if (t.type === 'KEYWORD' && t.value === 'not') { consume(); return { type: 'UNARY', operator: 'not', right: parsePrimary() }; }
                             throw new Error("Unknown token");
                         };
-                        
+
                         const parseComparison = () => {
                             let left = parsePrimary();
                             const t = peek();
@@ -203,12 +203,12 @@ self.addEventListener('fetch', (event) => {
                         if (node.type === 'CALL') {
                             const args = node.args.map(a => evaluate(a, item));
                             const fn = node.method.toLowerCase();
-                            if (fn === 'substringof') return String(args[1]||'').includes(String(args[0]||'')); 
-                            if (fn === 'startswith') return String(args[0]||'').startsWith(String(args[1]||''));
-                            if (fn === 'endswith') return String(args[0]||'').endsWith(String(args[1]||''));
-                            if (fn === 'tolower') return String(args[0]||'').toLowerCase();
-                            if (fn === 'toupper') return String(args[0]||'').toUpperCase();
-                            if (fn === 'indexof') return String(args[0]||'').indexOf(String(args[1]||''));
+                            if (fn === 'substringof') return String(args[1] || '').includes(String(args[0] || ''));
+                            if (fn === 'startswith') return String(args[0] || '').startsWith(String(args[1] || ''));
+                            if (fn === 'endswith') return String(args[0] || '').endsWith(String(args[1] || ''));
+                            if (fn === 'tolower') return String(args[0] || '').toLowerCase();
+                            if (fn === 'toupper') return String(args[0] || '').toUpperCase();
+                            if (fn === 'indexof') return String(args[0] || '').indexOf(String(args[1] || ''));
                         }
                         return false;
                     };
@@ -226,10 +226,10 @@ self.addEventListener('fetch', (event) => {
                 console.log('[SW] Attempting to retrieve from IndexedDB for:', event.request.url);
                 const dbName = "pwaapp-db";
                 const storeName = "odata-store";
-                
+
                 const parsedUrl = new URL(event.request.url);
                 let key = decodeURIComponent(parsedUrl.pathname);
-                
+
                 console.log('[SW] Original Key extracted:', key);
 
                 const sapIndex = key.indexOf('/sap/');
@@ -237,11 +237,11 @@ self.addEventListener('fetch', (event) => {
                     key = key.substring(sapIndex);
                     console.log('[SW] Normalized Key to:', key);
                 } else {
-                     console.log('[SW] No /sap/ prefix found in key.');
+                    console.log('[SW] No /sap/ prefix found in key.');
                 }
-                
-                const request = indexedDB.open(dbName, 3);
-                
+
+                const request = indexedDB.open(dbName, 4);
+
                 request.onsuccess = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains(storeName)) {
@@ -255,11 +255,25 @@ self.addEventListener('fetch', (event) => {
                     const transaction = db.transaction([storeName], "readonly");
                     const store = transaction.objectStore(storeName);
 
+                    // Check for single entity request
+                    const entityRegex = /zi_denuser\('([^']+)'\)$/;
+                    const match = key.match(entityRegex);
+                    let isSingleEntity = false;
+                    let entityKeyUsername = null;
+                    let lookupKey = key;
+
+                    if (match) {
+                        isSingleEntity = true;
+                        entityKeyUsername = match[1];
+                        lookupKey = key.replace(entityRegex, 'zi_denuser');
+                        console.log(`[SW] Single entity request for ${entityKeyUsername}. Lookup collection: ${lookupKey}`);
+                    }
+
                     // Special handling for $count
                     if (key.endsWith('/$count')) {
                         console.log('[SW] Intercepted $count request');
-                        const collectionKey = key.substring(0, key.length - 7); 
-                        
+                        const collectionKey = key.substring(0, key.length - 7);
+
                         const countReq = store.get(collectionKey);
                         countReq.onsuccess = () => {
                             let countVal = 0;
@@ -282,20 +296,42 @@ self.addEventListener('fetch', (event) => {
                             }));
                         };
                         countReq.onerror = () => {
-                             resolve(new Response('0', {
+                            resolve(new Response('0', {
                                 headers: { 'Content-Type': 'text/plain' }
                             }));
                         };
                         return;
                     }
 
-                    const getRequest = store.get(key);
-                    
+                    const getRequest = store.get(lookupKey);
+
                     getRequest.onsuccess = () => {
                         if (getRequest.result) {
-                            console.log('[SW] Data found in IndexedDB for key:', key);
+                            console.log('[SW] Data found in IndexedDB for key:', lookupKey);
 
                             let data = getRequest.result;
+
+                            if (isSingleEntity) {
+                                if (data && data.d && Array.isArray(data.d.results)) {
+                                    const foundItem = data.d.results.find(item => item.Username === entityKeyUsername);
+                                    if (foundItem) {
+                                        resolve(new Response(JSON.stringify({ d: foundItem }), {
+                                            headers: { 'Content-Type': 'application/json' }
+                                        }));
+                                    } else {
+                                        resolve(new Response('{"error":{"message":{"value":"Entity not found"}}}', {
+                                            status: 404,
+                                            headers: { 'Content-Type': 'application/json' }
+                                        }));
+                                    }
+                                } else {
+                                    resolve(new Response('{"error":{"message":{"value":"Data format error"}}}', {
+                                        status: 500,
+                                        headers: { 'Content-Type': 'application/json' }
+                                    }));
+                                }
+                                return;
+                            }
 
                             if (data && data.d && Array.isArray(data.d.results)) {
                                 let results = [...data.d.results];
@@ -352,7 +388,7 @@ self.addEventListener('fetch', (event) => {
                                 if (inlineCount === 'allpages') {
                                     responseData.d.__count = totalCount.toString();
                                 }
-                                
+
                                 resolve(new Response(JSON.stringify(responseData), {
                                     headers: { 'Content-Type': 'application/json' }
                                 }));
@@ -375,7 +411,7 @@ self.addEventListener('fetch', (event) => {
                         }));
                     };
                 };
-                
+
                 request.onerror = (e) => {
                     console.error('[SW] IndexedDB open error:', e);
                     resolve(new Response('{"d":{"results":[]}}', {
@@ -390,13 +426,13 @@ self.addEventListener('fetch', (event) => {
         // If Online -> Network only (no fallback to DB to avoid "mixed" signals or stale data if backend fails).
         // If Offline -> DB only.
         if (!navigator.onLine) {
-             console.log('[SW] Offline detected, fetching from DB...');
-             event.respondWith(getFromDB());
+            console.log('[SW] Offline detected, fetching from DB...');
+            event.respondWith(getFromDB());
         } else {
-             // Online mode: Go to network.
-             // If this fails, we let it fail, ensuring we don't serve cached/DB data while "Online".
-             console.log('[SW] Online mode detected, forwarding to network:', event.request.url);
-             event.respondWith(
+            // Online mode: Go to network.
+            // If this fails, we let it fail, ensuring we don't serve cached/DB data while "Online".
+            console.log('[SW] Online mode detected, forwarding to network:', event.request.url);
+            event.respondWith(
                 fetch(event.request).then(response => {
                     console.log('[SW] Network request successful');
                     return response;
