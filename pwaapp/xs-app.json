@@ -3,6 +3,13 @@
   "authenticationMethod": "route",
   "routes": [
     {
+      "source": "^/sap/(.*)$",
+      "target": "/sap/$1",
+      "destination": "DTA310-PP",
+      "authenticationType": "ias",
+      "csrfProtection": false
+    },
+    {
       "source": "^/resources/(.*)$",
       "target": "/resources/$1",
       "authenticationType": "none",
@@ -15,17 +22,20 @@
       "destination": "ui5"
     },
     {
-      "source": "^/sap/(.*)$",
-      "target": "/sap/$1",
-      "destination": "DTA310-PP",
-      "authenticationType": "xsuaa",
-      "csrfProtection": false
+      "source": "^/logout-page.html$",
+      "service": "app-front",
+      "authenticationType": "none"
+    },
+    {
+      "source": "^/index.html$",
+      "service": "app-front",
+      "cacheControl": "no-cache, no-store, must-revalidate"
     },
     {
       "source": "^(.*)$",
       "target": "$1",
-      "service": "html5-apps-repo-rt",
-      "authenticationType": "xsuaa"
+      "service": "app-front",
+      "authenticationType": "ias"
     }
   ]
 }

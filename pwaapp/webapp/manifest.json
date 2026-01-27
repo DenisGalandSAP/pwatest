@@ -1,5 +1,9 @@
 {
   "_version": "1.76.0",
+  "sap.cloud": {
+    "public": true,
+    "service": "pwatest"
+  },
   "sap.app": {
     "id": "pwaapp",
     "type": "application",
