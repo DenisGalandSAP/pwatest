@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-cache-v54';
+const CACHE_NAME = 'offline-cache-v55';
 const URLS_TO_CACHE = [
     'index.html',
     'pwamanifest.json',
@@ -30,9 +30,24 @@ self.addEventListener('activate', (event) => {
             self.clients.claim(),
             caches.keys().then((cacheKeys) => {
                 return Promise.all(
-                    cacheKeys.map((key) => {
-                        // Only delete caches that start with 'offline-cache-' and are not the current cache
-                        if (key !== CACHE_NAME) {
+                    cacheKeys.map(async (key) => {
+                        if (key !== CACHE_NAME && key.startsWith('offline-cache-')) {
+                            console.log('Migrating resources from old cache:', key);
+                            try {
+                                const oldCache = await caches.open(key);
+                                const newCache = await caches.open(CACHE_NAME);
+                                const requests = await oldCache.keys();
+                                await Promise.all(requests.map(async (request) => {
+                                    if (request.url.includes('/resources/')) {
+                                        const response = await oldCache.match(request);
+                                        if (response) {
+                                            await newCache.put(request, response);
+                                        }
+                                    }
+                                }));
+                            } catch (error) {
+                                console.error('Migration failed:', error);
+                            }
                             console.log('Deleting old cache:', key);
                             return caches.delete(key);
                         }
