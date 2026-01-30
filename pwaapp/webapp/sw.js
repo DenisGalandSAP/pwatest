@@ -1,8 +1,7 @@
-const CACHE_NAME = 'offline-cache-v55';
+const CACHE_NAME = 'offline-cache-v59';
 const URLS_TO_CACHE = [
     'index.html',
-    'pwamanifest.json',
-    'resources/sap-ui-version.json'
+    'pwamanifest.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -40,7 +39,7 @@ self.addEventListener('activate', (event) => {
                                 await Promise.all(requests.map(async (request) => {
                                     if (request.url.includes('/resources/')) {
                                         const response = await oldCache.match(request);
-                                        if (response) {
+                                        if (response && response.ok) {
                                             await newCache.put(request, response);
                                         }
                                     }
@@ -92,7 +91,9 @@ self.addEventListener('fetch', (event) => {
             caches.open(CACHE_NAME).then((cache) => {
                 return cache.match(event.request).then((response) => {
                     return response || fetch(event.request).then((networkResponse) => {
-                        cache.put(event.request, networkResponse.clone());
+                        if (networkResponse && networkResponse.status === 200) {
+                            cache.put(event.request, networkResponse.clone());
+                        }
                         return networkResponse;
                     });
                 });
@@ -399,7 +400,7 @@ self.addEventListener('fetch', (event) => {
                                         results: results
                                     }
                                 };
-                                
+
                                 if (inlineCount === 'allpages') {
                                     responseData.d.__count = totalCount;
                                 }
@@ -413,15 +414,15 @@ self.addEventListener('fetch', (event) => {
                                 }));
                             }
                         } else {
-                             // Data not found in DB
-                             console.warn('[SW] No data found in IndexedDB for key:', lookupKey);
-                             // Attempt to fallback to network if possible, or return empty if we are supposedly "handling" this offline path?
-                             // Since we are in the "Offline handler" block for a specific URL pattern, we should failing gracefully.
-                             // BUT, if we are ONLINE, we should have let the request pass through? 
-                             // The structure of the SW is:
-                             // event.respondWith( getFromDB().catch( () => fetch(...) ) ) 
-                             // We need to see how getFromDB is called.
-                             reject("No data in DB");
+                            // Data not found in DB
+                            console.warn('[SW] No data found in IndexedDB for key:', lookupKey);
+                            // Attempt to fallback to network if possible, or return empty if we are supposedly "handling" this offline path?
+                            // Since we are in the "Offline handler" block for a specific URL pattern, we should failing gracefully.
+                            // BUT, if we are ONLINE, we should have let the request pass through? 
+                            // The structure of the SW is:
+                            // event.respondWith( getFromDB().catch( () => fetch(...) ) ) 
+                            // We need to see how getFromDB is called.
+                            reject("No data in DB");
                         }
                     };
 

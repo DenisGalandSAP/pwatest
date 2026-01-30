@@ -9,7 +9,7 @@
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
-      "version": "0.0.56"
+      "version": "0.0.59"
     },
     "description": "{{appDescription}}",
     "resources": "resources.json",
